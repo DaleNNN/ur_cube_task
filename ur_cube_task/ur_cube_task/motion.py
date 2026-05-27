@@ -54,7 +54,7 @@ class MotionNode(Node):
 
         point = JointTrajectoryPoint()
         point.positions = positions
-        point.time_from_start = Duration(sec=5)
+        point.time_from_start = Duration(sec=2)
 
         trajectory.points.append(point)
 

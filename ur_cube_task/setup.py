@@ -31,6 +31,7 @@ setup(
 	    'move_to_pose_test = ur_cube_task.move_to_pose_test:main',
 	    'move_to_pose_action = ur_cube_task.move_to_pose_action:main',
 	    'fake_camera = ur_cube_task.fake_camera:main',
+	    'scene_publisher = ur_cube_task.scene_publisher:main',
 	]
     },
     
