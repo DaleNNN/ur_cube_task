@@ -89,8 +89,8 @@ class MoveToPoseAction(Node):
         goal.request.group_name = GROUP_NAME
         goal.request.num_planning_attempts = 20
         goal.request.allowed_planning_time = 15.0
-        goal.request.max_velocity_scaling_factor = 0.5
-        goal.request.max_acceleration_scaling_factor = 0.5
+        goal.request.max_velocity_scaling_factor = 0.05
+        goal.request.max_acceleration_scaling_factor = 0.05
         goal.request.pipeline_id = 'ompl'
         goal.request.planner_id = 'RRTConnectkConfigDefault'
         goal.request.goal_constraints.append(
