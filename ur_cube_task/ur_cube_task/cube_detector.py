@@ -34,15 +34,15 @@ class CubeDetector(Node):
             ((170, 80, 80), (180, 255, 255)),
         ])
 
-        yellow = self.detect_color(hsv, 'yellow', [
-            ((20, 80, 80), (35, 255, 255)),
+        green = self.detect_color(hsv, 'green', [
+            ((40, 80, 80), (80, 255, 255)),
         ])
 
         blue = self.detect_color(hsv, 'blue', [
             ((90, 80, 80), (130, 255, 255)),
         ])
 
-        for result in [red, yellow, blue]:
+        for result in [red, green, blue]:
             if result is not None:
                 name, x, y, area = result
                 detections.append(f'{name}:{x},{y},{int(area)}')

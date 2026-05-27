@@ -29,7 +29,9 @@ setup(
 	    'move_overview = ur_cube_task.move_overview:main',
 	    'cube_detector = ur_cube_task.cube_detector:main',	
 	    'move_to_pose_test = ur_cube_task.move_to_pose_test:main',
-	    'move_to_pose_action = ur_cube_task.move_to_pose_action:main', ],
+	    'move_to_pose_action = ur_cube_task.move_to_pose_action:main',
+	    'fake_camera = ur_cube_task.fake_camera:main',
+	]
     },
     
 )
