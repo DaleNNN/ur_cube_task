@@ -7,7 +7,7 @@ from ur_cube_task.move_to_pose_action import MoveToPoseAction
 def pixel_to_base_m(pixel_x, pixel_y):
     base_x = (0.06494821 * pixel_x + 0.61115661 * pixel_y - 489.035934) / 1000.0
     base_y = (0.65752405 * pixel_x + 0.02775560 * pixel_y - 316.834594) / 1000.0
-    base_z = 0.10  # 10 cm over bordet
+    base_z = 0.15  # 15 cm over bordet
     return base_x, base_y, base_z
 
 

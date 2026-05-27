@@ -65,8 +65,8 @@ class MoveToPoseAction(Node):
         oc.orientation.y = ORIENTATION_Y
         oc.orientation.z = ORIENTATION_Z
         oc.orientation.w = ORIENTATION_W
-        oc.absolute_x_axis_tolerance = 0.4
-        oc.absolute_y_axis_tolerance = 0.4
+        oc.absolute_x_axis_tolerance = 0.6
+        oc.absolute_y_axis_tolerance = 0.6
         oc.absolute_z_axis_tolerance = 6.28
         oc.weight = 1.0
         constraints.orientation_constraints.append(oc)
@@ -82,8 +82,8 @@ class MoveToPoseAction(Node):
 
         goal = MoveGroup.Goal()
         goal.request.group_name = GROUP_NAME
-        goal.request.num_planning_attempts = 10
-        goal.request.allowed_planning_time = 10.0
+        goal.request.num_planning_attempts = 20
+        goal.request.allowed_planning_time = 15.0
         goal.request.max_velocity_scaling_factor = 0.5
         goal.request.max_acceleration_scaling_factor = 0.5
         goal.request.pipeline_id = 'ompl'
@@ -93,7 +93,7 @@ class MoveToPoseAction(Node):
         )
         goal.planning_options.plan_only = False
         goal.planning_options.replan = True
-        goal.planning_options.replan_attempts = 3
+        goal.planning_options.replan_attempts = 5
 
         self.get_logger().info(f'x={x:.3f}, y={y:.3f}, z={z:.3f}')
 
