@@ -11,9 +11,10 @@ from moveit_msgs.msg import (
     OrientationConstraint,
     BoundingVolume,
     MoveItErrorCodes,
+    RobotState,
 )
 from shape_msgs.msg import SolidPrimitive
-
+from sensor_msgs.msg import JointState
 
 GROUP_NAME = 'ur_manipulator'
 BASE_FRAME = 'base_link'
@@ -73,12 +74,16 @@ class MoveToPoseAction(Node):
 
         return constraints
 
+
     def move_to_pose(self, x, y, z):
         if z < 0.05:
             self.get_logger().error('Target z too low. Refusing to move.')
             return False
 
         self.client.wait_for_server()
+
+        # Hent nåværende joint state
+        joint_msg = self.get_current_joint_state()
 
         goal = MoveGroup.Goal()
         goal.request.group_name = GROUP_NAME
@@ -91,6 +96,13 @@ class MoveToPoseAction(Node):
         goal.request.goal_constraints.append(
             self.create_constraints(x, y, z)
         )
+
+        # Sett startposisjon eksplisitt
+        if joint_msg is not None:
+            start_state = RobotState()
+            start_state.joint_state = joint_msg
+            goal.request.start_state = start_state
+
         goal.planning_options.plan_only = False
         goal.planning_options.replan = True
         goal.planning_options.replan_attempts = 5
@@ -117,6 +129,27 @@ class MoveToPoseAction(Node):
             self.get_logger().error(f'Failed. Code: {error_code}')
 
         return success
+
+    def get_current_joint_state(self):
+        from sensor_msgs.msg import JointState
+        msg = None
+
+        def cb(m):
+            nonlocal msg
+            msg = m
+
+        sub = self.create_subscription(JointState, '/joint_states', cb, 1)
+        timeout = self.get_clock().now()
+
+        while msg is None and rclpy.ok():
+            rclpy.spin_once(self, timeout_sec=0.1)
+            elapsed = (self.get_clock().now() - timeout).nanoseconds / 1e9
+            if elapsed > 2.0:
+                self.get_logger().warn('Timeout på joint states')
+                break
+
+        self.destroy_subscription(sub)
+        return msg
 
     def run(self):
         self.move_to_pose(-0.312, -0.264, 0.400)
