@@ -46,7 +46,7 @@ class MoveToPoseTest:
         return pose
 
     def move_to_pose(self, x, y, z):
-        if z < 0.28:
+        if z < 0.05:
             self.node.get_logger().error('Target z too low. Refusing to move.')
             return False
 

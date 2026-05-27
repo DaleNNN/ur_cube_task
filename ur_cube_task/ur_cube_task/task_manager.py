@@ -7,7 +7,7 @@ from ur_cube_task.move_to_pose_action import MoveToPoseAction
 def pixel_to_base_m(pixel_x, pixel_y):
     base_x = (0.06494821 * pixel_x + 0.61115661 * pixel_y - 489.035934) / 1000.0
     base_y = (0.65752405 * pixel_x + 0.02775560 * pixel_y - 316.834594) / 1000.0
-    base_z = 0.30  # 30 cm over bordet
+    base_z = 0.10  # 10 cm over bordet
     return base_x, base_y, base_z
 
 
@@ -66,7 +66,6 @@ class TaskManager(MotionNode):
         """Beveg til en alternativ posisjon og prøv å finne manglende kuber."""
         self.get_logger().warn(f'Leter etter: {missing_colors}')
 
-        # Alternativ søkeposisjon – juster disse til din robot
         SEARCH_POSITIONS = [
             [0.9, -1.57, -0.1, -0.9, -1.57, 0.0],
             [0.6, -1.57, -0.3, -0.6, -1.57, 0.0],
@@ -110,10 +109,8 @@ class TaskManager(MotionNode):
             extra = self.search_for_missing(missing)
 
             if extra:
-                # Slå sammen deteksjoner
                 detection = (detection or '') + (';' if detection else '') + extra
 
-            # Sjekk igjen
             still_missing = [c for c in required if f'{c}:' not in (detection or '')]
             if still_missing:
                 self.get_logger().error(f'Fant ikke: {still_missing} – stopper!')
@@ -123,7 +120,6 @@ class TaskManager(MotionNode):
         self.get_logger().info(f'Detektert: {detection}')
         cubes = parse_detections(detection)
 
-        # Beveg til hver kube
         for color in ['red', 'green', 'blue']:
             if color not in cubes:
                 self.get_logger().warn(f'{color} ikke funnet, hopper over')
@@ -137,14 +133,16 @@ class TaskManager(MotionNode):
                 f'Beveger mot {color}: x={x:.3f}, y={y:.3f}, z={z:.3f}'
             )
 
-            # Mellomposisjon – løft opp først
-            self.mover.move_to_pose(x, y, z + 0.1)
-
-            # Pek på kuben
-            success = self.mover.move_to_pose(x, y, z)
-
+            # Over kuben
+            success = self.mover.move_to_pose(x, y, z + 0.15)
             if not success:
-                self.get_logger().error(f'Klarte ikke å nå {color}')
+                self.get_logger().error(f'Bevegelse over {color} feilet')
+                continue
+
+            # Ned mot kuben
+            success = self.mover.move_to_pose(x, y, z)
+            if not success:
+                self.get_logger().error(f'Bevegelse til {color} feilet')
 
         self.get_logger().info('Ferdig – beveger hjem')
         self.move_to(HOME)

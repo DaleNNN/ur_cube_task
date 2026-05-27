@@ -54,18 +54,18 @@ class ScenePublisher(Node):
         scene = PlanningScene()
         scene.is_diff = True
 
-        # Bord – juster z til faktisk bordhøyde
-        table = self.make_box('table', 0.0, -0.2, -0.1, 0.8, 0.8, 0.02)
+        # Bord
+        table = self.make_box('table', 0.0, -0.2, -0.015, 1.2, 1.2, 0.02)
         scene.world.collision_objects.append(table)
         scene.object_colors.append(
             self.make_color('table', 0.6, 0.4, 0.2)
         )
 
-        # Kuber – bruk koordinatene fra deteksjonen
+        # Kuber
         cubes = [
-            ('red_cube',   -0.274, -0.175, 0.04,  1.0, 0.0, 0.0),
-            ('green_cube', -0.402, -0.158, 0.04,  0.0, 0.8, 0.0),
-            ('blue_cube',  -0.300,  0.005, 0.04,  0.0, 0.0, 1.0),
+            ('red_cube',   -0.274, -0.175, 0.025,  1.0, 0.0, 0.0),
+            ('green_cube', -0.402, -0.158, 0.025,  0.0, 0.8, 0.0),
+            ('blue_cube',  -0.300,  0.005, 0.025,  0.0, 0.0, 1.0),
         ]
 
         for name, x, y, z, r, g, b in cubes:

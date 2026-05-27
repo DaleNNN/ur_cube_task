@@ -8,6 +8,7 @@ from moveit_msgs.action import MoveGroup
 from moveit_msgs.msg import (
     Constraints,
     PositionConstraint,
+    OrientationConstraint,
     BoundingVolume,
     MoveItErrorCodes,
 )
@@ -18,9 +19,10 @@ GROUP_NAME = 'ur_manipulator'
 BASE_FRAME = 'base_link'
 LINK_NAME = 'tool0'
 
-TARGET_X = -0.312
-TARGET_Y = -0.264
-TARGET_Z = 0.400
+ORIENTATION_X = -0.704
+ORIENTATION_Y = 0.711
+ORIENTATION_Z = -0.005
+ORIENTATION_W = 0.007
 
 
 class MoveToPoseAction(Node):
@@ -28,15 +30,18 @@ class MoveToPoseAction(Node):
         super().__init__('move_to_pose_action')
         self.client = ActionClient(self, MoveGroup, '/move_action')
 
-    def create_goal_constraints(self, x, y, z):
+    def create_constraints(self, x, y, z):
         constraints = Constraints()
-        constraints.name = 'target_position_only'
+        constraints.name = 'position_and_orientation'
 
         target_pose = Pose()
         target_pose.position.x = x
         target_pose.position.y = y
         target_pose.position.z = z
-        target_pose.orientation.w = 1.0
+        target_pose.orientation.x = ORIENTATION_X
+        target_pose.orientation.y = ORIENTATION_Y
+        target_pose.orientation.z = ORIENTATION_Z
+        target_pose.orientation.w = ORIENTATION_W
 
         sphere = SolidPrimitive()
         sphere.type = SolidPrimitive.SPHERE
@@ -46,76 +51,82 @@ class MoveToPoseAction(Node):
         region.primitives.append(sphere)
         region.primitive_poses.append(target_pose)
 
-        position_constraint = PositionConstraint()
-        position_constraint.header.frame_id = BASE_FRAME
-        position_constraint.link_name = LINK_NAME
-        position_constraint.constraint_region = region
-        position_constraint.weight = 1.0
+        pc = PositionConstraint()
+        pc.header.frame_id = BASE_FRAME
+        pc.link_name = LINK_NAME
+        pc.constraint_region = region
+        pc.weight = 1.0
+        constraints.position_constraints.append(pc)
 
-        constraints.position_constraints.append(position_constraint)
+        oc = OrientationConstraint()
+        oc.header.frame_id = BASE_FRAME
+        oc.link_name = LINK_NAME
+        oc.orientation.x = ORIENTATION_X
+        oc.orientation.y = ORIENTATION_Y
+        oc.orientation.z = ORIENTATION_Z
+        oc.orientation.w = ORIENTATION_W
+        oc.absolute_x_axis_tolerance = 0.4
+        oc.absolute_y_axis_tolerance = 0.4
+        oc.absolute_z_axis_tolerance = 6.28
+        oc.weight = 1.0
+        constraints.orientation_constraints.append(oc)
+
         return constraints
 
     def move_to_pose(self, x, y, z):
-        if z < 0.28:
+        if z < 0.05:
             self.get_logger().error('Target z too low. Refusing to move.')
             return False
 
-        self.get_logger().info('Waiting for /move_action...')
         self.client.wait_for_server()
 
         goal = MoveGroup.Goal()
         goal.request.group_name = GROUP_NAME
-        goal.request.num_planning_attempts = 20
+        goal.request.num_planning_attempts = 10
         goal.request.allowed_planning_time = 10.0
-        goal.request.max_velocity_scaling_factor = 0.3
-        goal.request.max_acceleration_scaling_factor = 0.3
+        goal.request.max_velocity_scaling_factor = 0.5
+        goal.request.max_acceleration_scaling_factor = 0.5
+        goal.request.pipeline_id = 'ompl'
+        goal.request.planner_id = 'RRTConnectkConfigDefault'
         goal.request.goal_constraints.append(
-            self.create_goal_constraints(x, y, z)
+            self.create_constraints(x, y, z)
         )
-
         goal.planning_options.plan_only = False
-        goal.planning_options.look_around = False
         goal.planning_options.replan = True
         goal.planning_options.replan_attempts = 3
 
-        self.get_logger().info(
-            f'Sending MoveIt position-only goal: x={x:.3f}, y={y:.3f}, z={z:.3f}'
-        )
+        self.get_logger().info(f'x={x:.3f}, y={y:.3f}, z={z:.3f}')
 
         future = self.client.send_goal_async(goal)
         rclpy.spin_until_future_complete(self, future)
 
         goal_handle = future.result()
-
         if not goal_handle.accepted:
-            self.get_logger().error('MoveIt goal rejected')
+            self.get_logger().error('Goal rejected')
             return False
-
-        self.get_logger().info('MoveIt goal accepted. Waiting for result...')
 
         result_future = goal_handle.get_result_async()
         rclpy.spin_until_future_complete(self, result_future)
 
-        result = result_future.result().result
-        error_code = result.error_code.val
+        error_code = result_future.result().result.error_code.val
+        success = error_code == MoveItErrorCodes.SUCCESS
 
-        if error_code == MoveItErrorCodes.SUCCESS:
-            self.get_logger().info('MoveIt motion succeeded')
-            return True
+        if success:
+            self.get_logger().info('Succeeded')
+        else:
+            self.get_logger().error(f'Failed. Code: {error_code}')
 
-        self.get_logger().error(f'MoveIt motion failed. Error code: {error_code}')
-        return False
+        return success
 
     def run(self):
-        self.move_to_pose(TARGET_X, TARGET_Y, TARGET_Z)
+        self.move_to_pose(-0.312, -0.264, 0.400)
+        self.move_to_pose(-0.312, -0.264, 0.100)
 
 
 def main(args=None):
     rclpy.init(args=args)
-
     node = MoveToPoseAction()
     node.run()
-
     node.destroy_node()
     rclpy.shutdown()
 
