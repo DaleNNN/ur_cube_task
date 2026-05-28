@@ -7,6 +7,7 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 
 
+# Rekkefølgen på leddene slik de er definert i UR-driveren.
 JOINT_NAMES = [
     'elbow_joint',
     'shoulder_lift_joint',
@@ -16,7 +17,9 @@ JOINT_NAMES = [
     'wrist_3_joint',
 ]
 
-
+# Hvilestilling – roboten starter og avslutter her.
+# Kalibrert manuelt ved å jogge roboten til ønsket posisjon
+# og lese av /joint_states.
 HOME = [
     2.1971564292907715,
     -1.6938403288470667,
@@ -26,7 +29,9 @@ HOME = [
     2.8003487586975098,
 ]
 
-
+# Oversiktsposisjon – roboten tar bilde av bordet herfra.
+# shoulder_pan er rotert 180 grader (+ pi) fra opprinnelig posisjon
+# slik at kameraet peker ned mot arbeidsbordet.
 OVERVIEW = [
     1.5960044860839844,
     -1.5730956236468714,

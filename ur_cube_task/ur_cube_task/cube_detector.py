@@ -28,7 +28,7 @@ class CubeDetector(Node):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         detections = []
-
+        # Rød har to HSV-ranges fordi fargen går over 0/180-grensen i HSV
         red = self.detect_color(hsv, 'red', [
             ((0, 80, 80), (10, 255, 255)),
             ((170, 80, 80), (180, 255, 255)),
@@ -79,7 +79,8 @@ class CubeDetector(Node):
 
         largest = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest)
-
+        
+        # Filtrer ut støy ved å kreve et minimumsareal
         if area < 500:
             return None
 
@@ -87,6 +88,7 @@ class CubeDetector(Node):
         if moments['m00'] == 0:
             return None
 
+        # Beregn tyngdepunktet til konturen
         x = int(moments['m10'] / moments['m00'])
         y = int(moments['m01'] / moments['m00'])
 

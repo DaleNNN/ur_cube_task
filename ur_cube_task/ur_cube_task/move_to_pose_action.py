@@ -20,6 +20,7 @@ GROUP_NAME = 'ur_manipulator'
 BASE_FRAME = 'base'
 LINK_NAME = 'tool0'
 
+# Orientasjon for tool0 når kameraet peker rett ned mot bordet.
 ORIENTATION_X = -0.6481
 ORIENTATION_Y = -0.7615
 ORIENTATION_Z = -0.0030
@@ -32,6 +33,14 @@ class MoveToPoseAction(Node):
         self.client = ActionClient(self, MoveGroup, '/move_action')
 
     def create_constraints(self, x, y, z):
+        """
+        Bygger MoveIt-begrensninger for posisjon og orientasjon.
+
+        Posisjonen defineres som en sfære med radius 3 cm rundt målpunktet.
+        Orientasjonen låser tool0 til å peke ned mot bordet, med litt
+        toleranse rundt x- og y-aksene og fri rotasjon rundt z-aksen.
+        """
+        
         constraints = Constraints()
         constraints.name = 'position_and_orientation'
 
@@ -75,6 +84,16 @@ class MoveToPoseAction(Node):
         return constraints
 
     def move_to_pose(self, x, y, z):
+        """
+        Planlegg og utfør bevegelse til kartesisk posisjon (x, y, z) i meter.
+
+        Bruker OMPL RRTConnect som planlegger. Startposisjonen hentes fra
+        /joint_states for å sikre at planleggeren velger en IK-løsning
+        nær nåværende konfigurasjon og unngår unødvendig rotasjon av ledd.
+
+        Returnerer True hvis bevegelsen lykkes, False ellers.
+        """
+        
         if z < 0.05:
             self.get_logger().error('Target z too low. Refusing to move.')
             return False

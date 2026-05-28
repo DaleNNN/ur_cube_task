@@ -4,7 +4,13 @@ from ur_cube_task.motion import MotionNode, HOME, OVERVIEW
 from ur_cube_task.move_to_pose_action import MoveToPoseAction
 
 
+# Lineær mapping fra pikselkoordinater til robotens basekoordinater (meter).
+# Koeffisientene er beregnet med minste kvadraters metode fra calibrate.py,
+# ved å måle pikselposisjon fra /detected_cubes og TCP-posisjon fra
+# /tcp_pose_broadcaster/pose for samme kubeplassering.
+
 def pixel_to_base_m_overview(pixel_x, pixel_y):
+    # Mapping kalibrert fra OVERVIEW-posisjon.
     base_x = -0.00012041 * pixel_x + 0.00069164 * pixel_y + 0.64884920
     base_y =  0.00088782 * pixel_x + 0.00007304 * pixel_y - 0.10568992
     base_z = 0.15
@@ -12,6 +18,7 @@ def pixel_to_base_m_overview(pixel_x, pixel_y):
 
 
 def pixel_to_base_m_search1(pixel_x, pixel_y):
+    # Mapping kalibrert fra søkeposisjon 1.
     base_x = -0.00013883 * pixel_x + 0.00068072 * pixel_y + 0.40270163
     base_y =  0.00083119 * pixel_x + 0.00008692 * pixel_y - 0.09512639
     base_z = 0.15
@@ -19,12 +26,16 @@ def pixel_to_base_m_search1(pixel_x, pixel_y):
 
 
 def pixel_to_base_m_search2(pixel_x, pixel_y):
+    # Mapping kalibrert fra søkeposisjon 2.
     base_x = -0.00013369 * pixel_x + 0.00072359 * pixel_y + 0.86434552
     base_y =  0.00083883 * pixel_x + 0.00009673 * pixel_y - 0.10237664
     base_z = 0.15
     return base_x, base_y, base_z
 
 
+# Søkeposisjoner brukes hvis ikke alle kuber detekteres fra OVERVIEW.
+# Hver posisjon har sin egen kalibrerte mapping siden kameraet ser
+# bordet fra en annen vinkel og distanse.
 SEARCH_POSITIONS = [
     {
         'joints': [
@@ -52,6 +63,8 @@ SEARCH_POSITIONS = [
 
 
 def parse_detections(detection_string):
+    # Parser deteksjonsstrengen fra /detected_cubes.
+    # Format: 'red:x,y,area;green:x,y,area;blue:x,y,area'
     cubes = {}
     for part in detection_string.split(';'):
         name, values = part.split(':')
@@ -181,7 +194,7 @@ class TaskManager(MotionNode):
             self.get_logger().info(
                 f'Beveger mot {color}: x={x:.3f}, y={y:.3f}, z={z:.3f}'
             )
-
+            # Beveg til 10 cm over målhøyde først, deretter ned til målhøyde.
             success = self.mover.move_to_pose(x, y, z + 0.10)
             if not success:
                 self.get_logger().error(f'Bevegelse over {color} feilet')
