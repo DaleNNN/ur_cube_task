@@ -11,13 +11,14 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/config', ['config/camera_calibration.yaml']),
+        ('share/' + package_name + '/launch', ['launch/task.launch.py']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ystein-dale',
     maintainer_email='oystesd@stud.ntnu.no',
     description='UR10 cube detection and pointing task',
-    license='Apache-2.0,
+    license='Apache-2.0',
     entry_points={
         'console_scripts': [
             'task_manager = ur_cube_task.task_manager:main',
