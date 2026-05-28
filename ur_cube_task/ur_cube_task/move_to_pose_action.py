@@ -7,7 +7,6 @@ from geometry_msgs.msg import Pose
 from moveit_msgs.action import MoveGroup
 from moveit_msgs.msg import (
     Constraints,
-    JointConstraint,
     PositionConstraint,
     OrientationConstraint,
     BoundingVolume,
@@ -15,7 +14,7 @@ from moveit_msgs.msg import (
     RobotState,
 )
 from shape_msgs.msg import SolidPrimitive
-from sensor_msgs.msg import JointState
+
 
 GROUP_NAME = 'ur_manipulator'
 BASE_FRAME = 'base'
@@ -72,10 +71,8 @@ class MoveToPoseAction(Node):
         oc.absolute_z_axis_tolerance = 0.1
         oc.weight = 1.0
         constraints.orientation_constraints.append(oc)
-        
 
         return constraints
-
 
     def move_to_pose(self, x, y, z):
         if z < 0.05:
@@ -84,7 +81,6 @@ class MoveToPoseAction(Node):
 
         self.client.wait_for_server()
 
-        # Hent nåværende joint state
         joint_msg = self.get_current_joint_state()
 
         goal = MoveGroup.Goal()
@@ -99,7 +95,6 @@ class MoveToPoseAction(Node):
             self.create_constraints(x, y, z)
         )
 
-        # Sett startposisjon
         if joint_msg is not None:
             start_state = RobotState()
             start_state.joint_state = joint_msg
@@ -153,15 +148,10 @@ class MoveToPoseAction(Node):
         self.destroy_subscription(sub)
         return msg
 
-    def run(self):
-        self.move_to_pose(-0.312, -0.264, 0.400)
-        self.move_to_pose(-0.312, -0.264, 0.100)
-
 
 def main(args=None):
     rclpy.init(args=args)
     node = MoveToPoseAction()
-    node.run()
     node.destroy_node()
     rclpy.shutdown()
 
