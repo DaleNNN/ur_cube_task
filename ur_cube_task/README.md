@@ -55,6 +55,10 @@ Merk: RViz kan av og til starte uten 3D-modeller eller med roboten i en rar
 stilling. Dette skyldes en timing-feil ved oppstart. Lukk og start på nytt
 hvis dette skjer.
 
+Koordinatmappingen er kalibrert for den fysiske roboten og vil ikke være nøyaktig i simulering. Simulering brukes primært for å
+verifisere bevegelseslogikk, søkestrategi og systemflyt – ikke for å teste
+nøyaktighet i posisjonering.
+
 ## Manuell kjøring
 
 Flytt roboten til hjemposisjon:
