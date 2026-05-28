@@ -41,7 +41,7 @@ class TaskManager(MotionNode):
     def detection_callback(self, msg):
         self.latest_detection = msg.data
 
-    def wait_for_cubes(self, required_colors, timeout_sec=10.0):
+    def wait_for_cubes(self, required_colors, timeout_sec=5.0):
         self.latest_detection = None
         start = self.get_clock().now()
 
@@ -67,8 +67,30 @@ class TaskManager(MotionNode):
         self.get_logger().warn(f'Leter etter: {missing_colors}')
 
         SEARCH_POSITIONS = [
-            [0.9, -1.57, -0.1, -0.9, -1.57, 0.0],
-            [0.6, -1.57, -0.3, -0.6, -1.57, 0.0],
+            [
+                1.6119046211242676,
+                -1.5899313131915491,
+                2.7698233127593994,
+                -1.5872023741351526,
+                -1.5670631567584437,
+                2.6271586418151855,
+            ],
+            [
+                1.2916960716247559,
+                -1.3053210417376917,
+                2.8432233333587646,
+                -1.5519326368915003,
+                -1.571730915700094,
+                2.700591564178467,
+            ],
+            [
+                1.2765765190124512,
+                -1.2932685057269495,
+                3.0947916507720947,
+                -1.5513694922076624,
+                -1.5708454290973108,
+                2.9521267414093018,
+            ],
         ]
 
         for pos in SEARCH_POSITIONS:
@@ -80,9 +102,16 @@ class TaskManager(MotionNode):
 
             if detection:
                 found = [c for c in missing_colors if f'{c}:' in detection]
+                still_missing = [c for c in missing_colors if f'{c}:' not in detection]
+                
                 if found:
                     self.get_logger().info(f'Fant: {found}')
+                
+                if not still_missing:
                     return detection
+                else:
+                    self.get_logger().warn(f'Fortsatt mangler: {still_missing}, prøver neste posisjon')
+                    missing_colors = still_missing
 
         return None
 
@@ -95,7 +124,7 @@ class TaskManager(MotionNode):
 
         self.get_logger().info('Venter på kubedeteksjon...')
         required = ['red', 'green', 'blue']
-        detection = self.wait_for_cubes(required, timeout_sec=10.0)
+        detection = self.wait_for_cubes(required, timeout_sec=5.0)
 
         # Sjekk hvilke som mangler
         if detection is None:
@@ -134,7 +163,7 @@ class TaskManager(MotionNode):
             )
 
             # Over kuben
-            success = self.mover.move_to_pose(x, y, z + 0.25)
+            success = self.mover.move_to_pose(x, y, z + 0.10)
             if not success:
                 self.get_logger().error(f'Bevegelse over {color} feilet')
                 continue

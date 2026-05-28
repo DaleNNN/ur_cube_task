@@ -35,7 +35,7 @@ class CubeDetector(Node):
         ])
 
         green = self.detect_color(hsv, 'green', [
-            ((40, 40, 40), (90, 255, 255)),
+            ((70, 100, 80), (95, 255, 255)),
         ])
 
         blue = self.detect_color(hsv, 'blue', [

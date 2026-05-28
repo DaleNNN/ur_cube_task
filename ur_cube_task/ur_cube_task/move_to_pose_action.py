@@ -21,10 +21,10 @@ GROUP_NAME = 'ur_manipulator'
 BASE_FRAME = 'base'
 LINK_NAME = 'tool0'
 
-ORIENTATION_X = -0.648
-ORIENTATION_Y = -0.761
-ORIENTATION_Z = -0.003
-ORIENTATION_W = 0.004
+ORIENTATION_X = -0.6481
+ORIENTATION_Y = -0.7615
+ORIENTATION_Z = -0.0030
+ORIENTATION_W = 0.0041
 
 
 class MoveToPoseAction(Node):
@@ -67,9 +67,9 @@ class MoveToPoseAction(Node):
         oc.orientation.y = ORIENTATION_Y
         oc.orientation.z = ORIENTATION_Z
         oc.orientation.w = ORIENTATION_W
-        oc.absolute_x_axis_tolerance = 0.4
-        oc.absolute_y_axis_tolerance = 0.4
-        oc.absolute_z_axis_tolerance = 0.3
+        oc.absolute_x_axis_tolerance = 0.2
+        oc.absolute_y_axis_tolerance = 0.2
+        oc.absolute_z_axis_tolerance = 0.1
         oc.weight = 1.0
         constraints.orientation_constraints.append(oc)
         
