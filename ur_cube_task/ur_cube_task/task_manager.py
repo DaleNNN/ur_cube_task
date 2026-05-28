@@ -4,11 +4,51 @@ from ur_cube_task.motion import MotionNode, HOME, OVERVIEW
 from ur_cube_task.move_to_pose_action import MoveToPoseAction
 
 
-def pixel_to_base_m(pixel_x, pixel_y):
+def pixel_to_base_m_overview(pixel_x, pixel_y):
     base_x = -0.00012041 * pixel_x + 0.00069164 * pixel_y + 0.64884920
     base_y =  0.00088782 * pixel_x + 0.00007304 * pixel_y - 0.10568992
-    base_z = 0.15  # 15 cm over bordet
+    base_z = 0.15
     return base_x, base_y, base_z
+
+
+def pixel_to_base_m_search1(pixel_x, pixel_y):
+    base_x = -0.00013883 * pixel_x + 0.00068072 * pixel_y + 0.40270163
+    base_y =  0.00083119 * pixel_x + 0.00008692 * pixel_y - 0.09512639
+    base_z = 0.15
+    return base_x, base_y, base_z
+
+
+def pixel_to_base_m_search2(pixel_x, pixel_y):
+    base_x = -0.00013369 * pixel_x + 0.00072359 * pixel_y + 0.86434552
+    base_y =  0.00083883 * pixel_x + 0.00009673 * pixel_y - 0.10237664
+    base_z = 0.15
+    return base_x, base_y, base_z
+
+
+SEARCH_POSITIONS = [
+    {
+        'joints': [
+            1.9223222732543945,
+            -1.9978678862201136,
+            3.066216468811035,
+            -1.492248837147848,
+            -1.558852497731344,
+            2.922215461730957,
+        ],
+        'mapping': pixel_to_base_m_search1,
+    },
+    {
+        'joints': [
+            1.155440330505371,
+            -1.2025354544269007,
+            3.105088472366333,
+            -1.521036450062887,
+            -1.5724371115313929,
+            2.9621689319610596,
+        ],
+        'mapping': pixel_to_base_m_search2,
+    },
+]
 
 
 def parse_detections(detection_string):
@@ -63,39 +103,11 @@ class TaskManager(MotionNode):
         return None
 
     def search_for_missing(self, missing_colors):
-        """Beveg til en alternativ posisjon og prøv å finne manglende kuber."""
         self.get_logger().warn(f'Leter etter: {missing_colors}')
 
-        SEARCH_POSITIONS = [
-            [
-                1.6119046211242676,
-                -1.5899313131915491,
-                2.7698233127593994,
-                -1.5872023741351526,
-                -1.5670631567584437,
-                2.6271586418151855,
-            ],
-            [
-                1.2916960716247559,
-                -1.3053210417376917,
-                2.8432233333587646,
-                -1.5519326368915003,
-                -1.571730915700094,
-                2.700591564178467,
-            ],
-            [
-                1.2765765190124512,
-                -1.2932685057269495,
-                3.0947916507720947,
-                -1.5513694922076624,
-                -1.5708454290973108,
-                2.9521267414093018,
-            ],
-        ]
-
-        for pos in SEARCH_POSITIONS:
+        for search in SEARCH_POSITIONS:
             self.get_logger().info('Beveger til søkeposisjon...')
-            self.move_to(pos)
+            self.move_to(search['joints'])
 
             self.latest_detection = None
             detection = self.wait_for_cubes(missing_colors, timeout_sec=5.0)
@@ -103,17 +115,17 @@ class TaskManager(MotionNode):
             if detection:
                 found = [c for c in missing_colors if f'{c}:' in detection]
                 still_missing = [c for c in missing_colors if f'{c}:' not in detection]
-                
+
                 if found:
                     self.get_logger().info(f'Fant: {found}')
-                
+
                 if not still_missing:
-                    return detection
+                    return detection, search['mapping']
                 else:
-                    self.get_logger().warn(f'Fortsatt mangler: {still_missing}, prøver neste posisjon')
+                    self.get_logger().warn(f'Fortsatt mangler: {still_missing}')
                     missing_colors = still_missing
 
-        return None
+        return None, None
 
     def run(self):
         self.get_logger().info('Beveger til home')
@@ -126,29 +138,36 @@ class TaskManager(MotionNode):
         required = ['red', 'green', 'blue']
         detection = self.wait_for_cubes(required, timeout_sec=5.0)
 
-        # Sjekk hvilke som mangler
         if detection is None:
             missing = required
         else:
             missing = [c for c in required if f'{c}:' not in detection]
 
+        # Bygg opp cubes-dict fra OVERVIEW
+        cubes = {}
+        if detection:
+            for color, data in parse_detections(detection).items():
+                cubes[color] = data
+                cubes[color]['mapping'] = pixel_to_base_m_overview
+
         # Søk etter manglende
         if missing:
             self.get_logger().warn(f'Mangler: {missing}')
-            extra = self.search_for_missing(missing)
+            extra, search_mapping = self.search_for_missing(missing)
 
-            if extra:
-                detection = (detection or '') + (';' if detection else '') + extra
+            if extra and search_mapping:
+                for color, data in parse_detections(extra).items():
+                    if color not in cubes:
+                        cubes[color] = data
+                        cubes[color]['mapping'] = search_mapping
+                        missing.remove(color)
 
-            still_missing = [c for c in required if f'{c}:' not in (detection or '')]
-            if still_missing:
-                self.get_logger().error(f'Fant ikke: {still_missing} – stopper!')
+            if missing:
+                self.get_logger().error(f'Fant ikke: {missing} – stopper!')
                 self.move_to(HOME)
                 return
 
-        self.get_logger().info(f'Detektert: {detection}')
-        cubes = parse_detections(detection)
-
+        # Beveg til hver kube
         for color in ['red', 'green', 'blue']:
             if color not in cubes:
                 self.get_logger().warn(f'{color} ikke funnet, hopper over')
@@ -156,19 +175,18 @@ class TaskManager(MotionNode):
 
             px = cubes[color]['pixel_x']
             py = cubes[color]['pixel_y']
-            x, y, z = pixel_to_base_m(px, py)
+            mapping = cubes[color].get('mapping', pixel_to_base_m_overview)
+            x, y, z = mapping(px, py)
 
             self.get_logger().info(
                 f'Beveger mot {color}: x={x:.3f}, y={y:.3f}, z={z:.3f}'
             )
 
-            # Over kuben
             success = self.mover.move_to_pose(x, y, z + 0.10)
             if not success:
                 self.get_logger().error(f'Bevegelse over {color} feilet')
                 continue
 
-            # Ned mot kuben
             success = self.mover.move_to_pose(x, y, z)
             if not success:
                 self.get_logger().error(f'Bevegelse til {color} feilet')
