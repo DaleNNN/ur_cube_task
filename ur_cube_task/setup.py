@@ -11,7 +11,10 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/config', ['config/camera_calibration.yaml']),
-        ('share/' + package_name + '/launch', ['launch/task.launch.py']),
+        ('share/' + package_name + '/launch', [
+            'launch/task.launch.py',
+            'launch/sim.launch.py',
+        ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -26,6 +29,8 @@ setup(
             'move_overview = ur_cube_task.move_overview:main',
             'cube_detector = ur_cube_task.cube_detector:main',
             'move_to_pose_action = ur_cube_task.move_to_pose_action:main',
+            'fake_camera = ur_cube_task.fake_camera:main',
+            'scene_publisher = ur_cube_task.scene_publisher:main',
         ],
     },
     
