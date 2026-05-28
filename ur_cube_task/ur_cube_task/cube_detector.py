@@ -30,8 +30,8 @@ class CubeDetector(Node):
         detections = []
         # Rød har to HSV-ranges fordi fargen går over 0/180-grensen i HSV
         red = self.detect_color(hsv, 'red', [
-            ((0, 80, 80), (10, 255, 255)),
-            ((170, 80, 80), (180, 255, 255)),
+            ((0, 60, 60), (10, 255, 255)),
+            ((170, 60, 60), (180, 255, 255)),
         ])
 
         green = self.detect_color(hsv, 'green', [

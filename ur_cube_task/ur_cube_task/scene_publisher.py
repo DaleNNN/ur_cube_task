@@ -55,7 +55,7 @@ class ScenePublisher(Node):
         scene.is_diff = True
 
         # Bord
-        table = self.make_box('table', 0.0, -0.2, -0.015, 1.2, 1.2, 0.02)
+        table = self.make_box('table', -0.7, 0.0, -0.015, 1.4, 1.4, 0.02)
         scene.world.collision_objects.append(table)
         scene.object_colors.append(
             self.make_color('table', 0.6, 0.4, 0.2)
@@ -63,9 +63,9 @@ class ScenePublisher(Node):
 
         # Kuber
         cubes = [
-            ('red_cube',   -0.274, -0.175, 0.025,  1.0, 0.0, 0.0),
-            ('green_cube', -0.402, -0.158, 0.025,  0.0, 0.8, 0.0),
-            ('blue_cube',  -0.300,  0.005, 0.025,  0.0, 0.0, 1.0),
+            ('red_cube',   -0.853,  0.098, 0.05,  1.0, 0.0, 0.0),
+            ('green_cube', -0.701,  0.112, 0.05,  0.0, 0.8, 0.0),
+            ('blue_cube',  -0.770, -0.338, 0.05,  0.0, 0.0, 1.0),
         ]
 
         for name, x, y, z, r, g, b in cubes:

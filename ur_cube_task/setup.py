@@ -15,6 +15,7 @@ setup(
             'launch/task.launch.py',
             'launch/sim.launch.py',
         ]),
+        ('share/' + package_name + '/simulation', ['simulation/test_image.jpg']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

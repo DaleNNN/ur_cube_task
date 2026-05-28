@@ -49,7 +49,7 @@ def generate_launch_description():
         parameters=[{
             'image_path': os.path.join(
                 get_package_share_directory('ur_cube_task'),
-                'test_image.jpg'
+                'simulation', 'test_image.jpg'
             ),
         }],
     )
@@ -58,9 +58,6 @@ def generate_launch_description():
         package='ur_cube_task',
         executable='cube_detector',
         name='cube_detector',
-        remappings=[
-            ('/camera/image_raw', '/image_raw'),
-        ]
     )
 
     scene_publisher = Node(
