@@ -1,7 +1,7 @@
 # UR Cube Task
 
 Automatisert system for deteksjon og lokalisering av fargekodede kuber med en UR10-robot.
-Utviklet som en del av et robotikkprosjekt ved HVL.
+Utviklet som en del av et robotikkprosjekt ved NTNU.
 
 ## Industriell kontekst
 
