@@ -5,8 +5,8 @@ from ur_cube_task.move_to_pose_action import MoveToPoseAction
 
 
 def pixel_to_base_m(pixel_x, pixel_y):
-    base_x = (0.06494821 * pixel_x + 0.61115661 * pixel_y - 489.035934) / 1000.0
-    base_y = (0.65752405 * pixel_x + 0.02775560 * pixel_y - 316.834594) / 1000.0
+    base_x = -0.00012041 * pixel_x + 0.00069164 * pixel_y + 0.64884920
+    base_y =  0.00088782 * pixel_x + 0.00007304 * pixel_y - 0.10568992
     base_z = 0.15  # 15 cm over bordet
     return base_x, base_y, base_z
 
@@ -134,7 +134,7 @@ class TaskManager(MotionNode):
             )
 
             # Over kuben
-            success = self.mover.move_to_pose(x, y, z + 0.15)
+            success = self.mover.move_to_pose(x, y, z + 0.25)
             if not success:
                 self.get_logger().error(f'Bevegelse over {color} feilet')
                 continue

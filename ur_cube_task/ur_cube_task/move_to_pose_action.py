@@ -7,6 +7,7 @@ from geometry_msgs.msg import Pose
 from moveit_msgs.action import MoveGroup
 from moveit_msgs.msg import (
     Constraints,
+    JointConstraint,
     PositionConstraint,
     OrientationConstraint,
     BoundingVolume,
@@ -17,13 +18,13 @@ from shape_msgs.msg import SolidPrimitive
 from sensor_msgs.msg import JointState
 
 GROUP_NAME = 'ur_manipulator'
-BASE_FRAME = 'base_link'
+BASE_FRAME = 'base'
 LINK_NAME = 'tool0'
 
-ORIENTATION_X = -0.704
-ORIENTATION_Y = 0.711
-ORIENTATION_Z = -0.005
-ORIENTATION_W = 0.007
+ORIENTATION_X = -0.648
+ORIENTATION_Y = -0.761
+ORIENTATION_Z = -0.003
+ORIENTATION_W = 0.004
 
 
 class MoveToPoseAction(Node):
@@ -66,11 +67,12 @@ class MoveToPoseAction(Node):
         oc.orientation.y = ORIENTATION_Y
         oc.orientation.z = ORIENTATION_Z
         oc.orientation.w = ORIENTATION_W
-        oc.absolute_x_axis_tolerance = 0.6
-        oc.absolute_y_axis_tolerance = 0.6
-        oc.absolute_z_axis_tolerance = 6.28
+        oc.absolute_x_axis_tolerance = 0.4
+        oc.absolute_y_axis_tolerance = 0.4
+        oc.absolute_z_axis_tolerance = 0.3
         oc.weight = 1.0
         constraints.orientation_constraints.append(oc)
+        
 
         return constraints
 
@@ -97,7 +99,7 @@ class MoveToPoseAction(Node):
             self.create_constraints(x, y, z)
         )
 
-        # Sett startposisjon eksplisitt
+        # Sett startposisjon
         if joint_msg is not None:
             start_state = RobotState()
             start_state.joint_state = joint_msg
