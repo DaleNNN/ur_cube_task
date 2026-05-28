@@ -79,5 +79,6 @@ base_search2 = [
     [0.8595,  0.1531],
 ]
 
+calibrate('Simulering', pixels_sim, base_sim)
 calibrate('Søkeposisjon 1', pixels_search1, base_search1)
 calibrate('Søkeposisjon 2', pixels_search2, base_search2)

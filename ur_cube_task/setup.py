@@ -15,25 +15,17 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ystein-dale',
-    maintainer_email='ystein-dale@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
-    extras_require={
-        'test': [
-            'pytest',
-        ],
-    },
+    maintainer_email='oystesd@stud.ntnu.no',
+    description='UR10 cube detection and pointing task',
+    license='Apache-2.0,
     entry_points={
         'console_scripts': [
-	    'task_manager = ur_cube_task.task_manager:main',
-	    'move_home = ur_cube_task.move_home:main',
-	    'move_overview = ur_cube_task.move_overview:main',
-	    'cube_detector = ur_cube_task.cube_detector:main',	
-	    'move_to_pose_test = ur_cube_task.move_to_pose_test:main',
-	    'move_to_pose_action = ur_cube_task.move_to_pose_action:main',
-	    'fake_camera = ur_cube_task.fake_camera:main',
-	    'scene_publisher = ur_cube_task.scene_publisher:main',
-	]
+            'task_manager = ur_cube_task.task_manager:main',
+            'move_home = ur_cube_task.move_home:main',
+            'move_overview = ur_cube_task.move_overview:main',
+            'cube_detector = ur_cube_task.cube_detector:main',
+            'move_to_pose_action = ur_cube_task.move_to_pose_action:main',
+        ],
     },
     
 )
